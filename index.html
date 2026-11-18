@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Even Science Simulations</title>
+<meta name="description" content="Interactive science simulations for class.">
+<style>
+  :root {
+    --bg: #070a12; --card: #0f1526; --card-2: #151d33; --line: #232e4a;
+    --text: #e8ecf7; --muted: #8f9ab8; --accent: #7fd1ff;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 48px 20px 64px; }
+  header h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 6px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); max-width: 560px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; margin-top: 32px; }
+  a.card { display: flex; flex-direction: column; text-decoration: none; color: inherit; background: var(--card);
+    border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: transform .15s, border-color .15s; }
+  a.card:hover, a.card:focus-visible { transform: translateY(-3px); border-color: var(--accent); outline: none; }
+  .thumb { aspect-ratio: 16 / 9; background: var(--card-2); display: block; width: 100%; }
+  .body { padding: 14px 16px 18px; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 999px; margin-bottom: 8px; }
+  .astro { background: rgba(127, 209, 255, .14); color: #7fd1ff; }
+  .phys { background: rgba(255, 170, 70, .15); color: #ffb04a; }
+  .card h2 { font-size: 19px; margin: 0 0 4px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Even Science Simulations</h1>
+    <p>Interactive models for class. Pick one to explore.</p>
+  </header>
+
+  <div class="grid">
+    <a class="card" href="motion/">
+      <svg class="thumb" viewBox="0 0 320 180" aria-hidden="true">
+        <rect width="320" height="180" fill="#151d33"/>
+        <line x1="20" y1="130" x2="300" y2="130" stroke="#8f9ab8" stroke-width="2"/>
+        <text x="16" y="120" fill="#8f9ab8" font-size="22" font-family="system-ui">−</text>
+        <text x="292" y="120" fill="#8f9ab8" font-size="22" font-family="system-ui">+</text>
+        <g fill="#e8ecf7">
+          <circle cx="50" cy="116" r="5"/><circle cx="62" cy="116" r="5"/><circle cx="84" cy="116" r="5"/>
+          <circle cx="118" cy="116" r="5"/><circle cx="164" cy="116" r="5"/><circle cx="222" cy="116" r="5"/>
+        </g>
+        <rect x="236" y="62" width="44" height="22" rx="5" fill="#ffb04a"/>
+        <circle cx="246" cy="88" r="5" fill="#e8ecf7"/><circle cx="270" cy="88" r="5" fill="#e8ecf7"/>
+        <g stroke-width="4" stroke-linecap="round">
+          <line x1="258" y1="40" x2="300" y2="40" stroke="#3ddc97"/><line x1="258" y1="26" x2="280" y2="26" stroke="#ff9f43"/>
+        </g>
+        <path d="M300 40 l-8 -5 v10 z" fill="#3ddc97"/><path d="M280 26 l-8 -5 v10 z" fill="#ff9f43"/>
+      </svg>
+      <div class="body">
+        <span class="tag phys">Physics</span>
+        <h2>Motion Diagrams</h2>
+        <p>See how velocity, acceleration and net force shape the dots. Includes a quiz mode.</p>
+      </div>
+    </a>
+
+    <a class="card" href="epicycles/">
+      <svg class="thumb" viewBox="0 0 320 180" aria-hidden="true">
+        <rect width="320" height="180" fill="#05070d"/>
+        <g fill="#cfd8ff" opacity=".7"><circle cx="30" cy="20" r="1"/><circle cx="290" cy="30" r="1.2"/><circle cx="250" cy="150" r="1"/><circle cx="60" cy="160" r="1.2"/><circle cx="200" cy="18" r="1"/></g>
+        <ellipse cx="160" cy="92" rx="92" ry="56" fill="none" stroke="#5b6a92" stroke-width="1.5"/>
+        <circle cx="236" cy="62" r="26" fill="none" stroke="#b68cff" stroke-width="1.5"/>
+        <line x1="160" y1="92" x2="236" y2="62" stroke="#8d97b3" stroke-width="1.2"/>
+        <line x1="236" y1="62" x2="218" y2="44" stroke="#b68cff" stroke-width="1.5"/>
+        <circle cx="160" cy="92" r="8" fill="#2f74c0"/><circle cx="218" cy="44" r="5" fill="#e0603a"/>
+        <path d="M70 120 q20 -30 40 -10 q-12 14 6 -16 q14 -26 38 -10" fill="none" stroke="#ff5470" stroke-width="2"/>
+      </svg>
+      <div class="body">
+        <span class="tag astro">Astronomy</span>
+        <h2>Epicycles &amp; Retrograde Motion</h2>
+        <p>Ptolemy's Earth-centered model, compared side by side with the Sun-centered view.</p>
+      </div>
+    </a>
+  </div>
+
+  <footer>Works on Chromebooks, phones and projectors.</footer>
+</div>
+</body>
+</html>

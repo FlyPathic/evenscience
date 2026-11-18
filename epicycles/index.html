@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Epicycles &amp; Retrograde Motion</title>
+<meta name="description" content="Interactive 3D model of Ptolemy's epicycles and planetary retrograde motion, with a Sun-centered comparison.">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": { "three": "./vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+<div id="app">
+  <main id="stage">
+    <canvas id="gl" aria-label="3D model of planetary motion"></canvas>
+
+    <div id="hud">
+      <div class="hud-mode" id="hudMode">Earth-centered · Ptolemy</div>
+      <div class="hud-planet"><span class="dot" id="hudDot"></span><span id="hudPlanet">Mars</span></div>
+      <div class="hud-row"><span>Day</span><b id="hudDay">0</b></div>
+      <div class="hud-row"><span>Seen in</span><b id="hudPos">—</b></div>
+      <div class="hud-row"><span>From the Sun</span><b id="hudElong">—</b></div>
+      <div id="badge" class="badge pro">Moving eastward (prograde)</div>
+      <div id="event" class="event"></div>
+    </div>
+
+    <div id="viewbar" role="group" aria-label="Camera view">
+      <button data-view="3d" class="on" title="Free 3D view (key 1)">3D</button>
+      <button data-view="top" title="Looking down on the plane (key 2)">Top</button>
+      <button data-view="earth" title="Stand on Earth and watch the sky (key 3)">From Earth</button>
+    </div>
+
+    <div id="earthHint">Drag to look around · scroll / pinch to zoom</div>
+
+    <div id="chartWrap">
+      <canvas id="chart"></canvas>
+    </div>
+  </main>
+
+  <aside id="panel">
+    <header>
+      <h1>Epicycles &amp; Retrograde Motion</h1>
+      <p class="sub">Why do planets sometimes appear to move backward across the sky?</p>
+    </header>
+
+    <section>
+      <div class="seg" id="modeSeg" role="group" aria-label="Model">
+        <button data-mode="ptolemy" class="on">Earth-centered<small>Ptolemy</small></button>
+        <button data-mode="copernicus">Sun-centered<small>Copernicus</small></button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Planet</h2>
+      <div class="chips" id="planetChips"></div>
+      <div class="custom-note" id="customNote" hidden>Custom settings, based on <span id="customBase"></span>.</div>
+    </section>
+
+    <section class="transport">
+      <button id="playBtn" class="primary" title="Space">Pause</button>
+      <button id="stepBtn" title="Advance 10 days">+10 days</button>
+      <button id="resetBtn" title="R">Reset</button>
+      <label class="slider">
+        <span>Speed <output id="speedOut"></output></span>
+        <input type="range" id="speed" min="0" max="1000" value="560">
+      </label>
+    </section>
+
+    <section>
+      <h2>Ptolemy's circles</h2>
+      <label class="slider">
+        <span>Epicycle size <output id="kOut"></output></span>
+        <input type="range" id="k" min="0" max="950" value="656">
+      </label>
+      <label class="slider">
+        <span>Deferent period <output id="TdOut"></output></span>
+        <input type="range" id="Td" min="0" max="1000">
+      </label>
+      <label class="slider">
+        <span>Epicycle period <output id="TeOut"></output></span>
+        <input type="range" id="Te" min="0" max="1000">
+      </label>
+      <label class="slider">
+        <span>Tilt of orbit <output id="tiltOut"></output></span>
+        <input type="range" id="tilt" min="0" max="150" value="19">
+      </label>
+      <label class="check"><input type="checkbox" id="equant"> Off-center Earth &amp; equant</label>
+      <label class="slider" id="eccRow">
+        <span>Eccentricity <output id="eccOut"></output></span>
+        <input type="range" id="ecc" min="0" max="300" value="100">
+      </label>
+      <p class="note" id="equantNote" hidden>The equant belongs to Ptolemy's model only, so it is ignored in the Sun-centered view.</p>
+    </section>
+
+    <section>
+      <h2>Show</h2>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="showTrail" checked> Planet's path</label>
+        <label class="check"><input type="checkbox" id="showSky" checked> Track on the sky</label>
+        <label class="check"><input type="checkbox" id="showSight" checked> Line of sight</label>
+        <label class="check"><input type="checkbox" id="showSnaps"> Numbered sight lines</label>
+        <label class="check"><input type="checkbox" id="showSun" checked> Sun</label>
+        <label class="check"><input type="checkbox" id="showArms" checked> Arms</label>
+        <label class="check"><input type="checkbox" id="showLabels" checked> Labels</label>
+        <label class="check"><input type="checkbox" id="showChart" checked> Position chart</label>
+      </div>
+      <label class="slider">
+        <span>Path length <output id="trailOut"></output></span>
+        <input type="range" id="trail" min="0" max="1000" value="500">
+      </label>
+    </section>
+
+    <section>
+      <details open id="explain">
+        <summary>What am I looking at?</summary>
+        <div id="explainBody"></div>
+      </details>
+      <details>
+        <summary>Try this</summary>
+        <ol class="try">
+          <li>Watch the <b>From Earth</b> view. The planet drifts east (left), stops, loops back west, then turns east again.</li>
+          <li>Drag <b>Epicycle size</b> to 0. Does retrograde motion still happen?</li>
+          <li>Switch between Earth-centered and Sun-centered. Compare the sky track and the chart: they are the same. Both models predict the same sky.</li>
+          <li>Pick Mars and watch when the badge turns red. Where is the Sun? (Look at "From the Sun".)</li>
+          <li>Change the <b>Epicycle period</b> away from 1 year. Retrograde no longer lines up with the Sun. Ptolemy had to build that link in by hand.</li>
+          <li>Turn on <b>Numbered sight lines</b> in the Sun-centered view to see Earth overtake Mars.</li>
+        </ol>
+      </details>
+      <details>
+        <summary>Keyboard</summary>
+        <p class="note"><kbd>Space</kbd> play/pause · <kbd>R</kbd> reset · <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> views · <kbd>M</kbd> switch model · <kbd>←</kbd> <kbd>→</kbd> step</p>
+      </details>
+    </section>
+  </aside>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

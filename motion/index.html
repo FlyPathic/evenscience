@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion Diagrams</title>
+<meta name="description" content="Dot (motion) diagrams: how velocity, acceleration and net force shape the motion.">
+<link rel="stylesheet" href="motion.css">
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <a class="back" href="../">← All simulations</a>
+    <h1>Motion Diagrams</h1>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-mode="explore" class="on" aria-selected="true">Explore</button>
+      <button role="tab" data-mode="quiz" aria-selected="false">Quiz</button>
+    </div>
+    <button id="themeBtn" class="ghost" title="Switch light / dark (light is easier to see on projectors)">Light</button>
+  </header>
+
+  <div class="layout">
+    <main>
+      <section class="card stage-card">
+        <canvas id="stage" aria-label="Motion diagram"></canvas>
+
+        <div class="readouts" id="readouts">
+          <div class="ro"><span>time</span><b id="roT">0.0 s</b></div>
+          <div class="ro pos"><span>position x</span><b id="roX"></b></div>
+          <div class="ro vel"><span>velocity v</span><b id="roV"></b></div>
+          <div class="ro acc"><span>acceleration a</span><b id="roA"></b></div>
+          <div class="ro frc"><span>net force F<sub>net</sub></span><b id="roF"></b></div>
+          <div class="status" id="status"><b id="statusMain"></b><span id="statusWhy"></span></div>
+        </div>
+
+        <div class="transport" id="transport">
+          <button id="playBtn" class="primary">Play</button>
+          <button id="stepBtn" title="Jump to the next dot (→)">Next dot</button>
+          <button id="endBtn" title="Draw the whole diagram">Show all</button>
+          <button id="resetBtn" title="R">Reset</button>
+          <label class="inline">Speed
+            <select id="speed">
+              <option value="0.25">¼×</option>
+              <option value="0.5">½×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="graphs" id="graphs">
+        <div class="card graph"><canvas id="gx" aria-label="Position versus time graph"></canvas></div>
+        <div class="card graph"><canvas id="gv" aria-label="Velocity versus time graph"></canvas></div>
+        <div class="card graph"><canvas id="ga" aria-label="Acceleration and net force versus time graph"></canvas></div>
+      </section>
+    </main>
+
+    <!-- Explore controls -->
+    <aside class="panel card" id="explorePanel">
+      <h2>Examples</h2>
+      <div class="presets" id="presets"></div>
+
+      <h2>Starting conditions</h2>
+      <label class="slider"><span>Starting position x₀ <output id="x0Out"></output></span>
+        <input type="range" id="x0" min="-9" max="9" step="0.5"></label>
+      <label class="slider vel"><span>Starting velocity v₀ <output id="v0Out"></output></span>
+        <input type="range" id="v0" min="-8" max="8" step="0.5"></label>
+      <label class="slider acc"><span>Acceleration a <output id="aOut"></output></span>
+        <input type="range" id="a" min="-4" max="4" step="0.25"></label>
+      <label class="slider frc"><span>Mass m <output id="mOut"></output></span>
+        <input type="range" id="m" min="0.5" max="10" step="0.5"></label>
+      <label class="slider"><span>Time between dots Δt
+        <select id="dt">
+          <option value="0.25">0.25 s</option>
+          <option value="0.5">0.5 s</option>
+          <option value="1" selected>1 s</option>
+          <option value="2">2 s</option>
+        </select></span></label>
+
+      <h2>Show</h2>
+      <div class="checks">
+        <label class="check vel"><input type="checkbox" id="showV" checked> Velocity arrow</label>
+        <label class="check acc"><input type="checkbox" id="showA" checked> Acceleration arrow</label>
+        <label class="check frc"><input type="checkbox" id="showF" checked> Net force arrow</label>
+        <label class="check"><input type="checkbox" id="showNumbers" checked> Number the dots</label>
+        <label class="check"><input type="checkbox" id="showDotArrows"> Velocity arrow on each dot</label>
+        <label class="check"><input type="checkbox" id="showGhosts"> Ghost images</label>
+        <label class="check"><input type="checkbox" id="showGaps"> Gap sizes (Δx)</label>
+        <label class="check"><input type="checkbox" id="showGraphs" checked> Graphs</label>
+        <label class="check"><input type="checkbox" id="pauseAtStop" checked> Pause when it stops (v = 0)</label>
+      </div>
+    </aside>
+
+    <!-- Quiz -->
+    <aside class="panel card" id="quizPanel" hidden>
+      <div class="score" id="score">Score 0 / 0</div>
+      <h2>Read the dot diagram</h2>
+      <p class="hint">The ring marks where the object starts. Each dot is one flash of a strobe light, taken every second.</p>
+
+      <div class="q" data-q="v">
+        <div class="qlabel vel">Velocity (at the start)</div>
+        <div class="choices" data-choices="sign"></div>
+      </div>
+      <div class="q" data-q="a">
+        <div class="qlabel acc">Acceleration</div>
+        <div class="choices" data-choices="sign"></div>
+      </div>
+      <div class="q" data-q="F">
+        <div class="qlabel frc">Net force</div>
+        <div class="choices" data-choices="sign"></div>
+      </div>
+      <div class="q" data-q="motion">
+        <div class="qlabel">The object is…</div>
+        <div class="choices wrap" data-choices="motion"></div>
+      </div>
+
+      <div class="qbtns">
+        <button id="checkBtn" class="primary" disabled>Check</button>
+        <button id="revealBtn" disabled>Watch it move</button>
+        <button id="nextBtn">Next diagram</button>
+      </div>
+      <div class="feedback" id="feedback" hidden></div>
+      <label class="check"><input type="checkbox" id="harder"> Harder (adds v = 0, a = 0 and turnarounds)</label>
+    </aside>
+  </div>
+</div>
+<script src="motion.js"></script>
+</body>
+</html>
