@@ -277,13 +277,19 @@ function fmtTick(v) {
 
 // ---------- explore state ----------
 const S = {
-  x0: -9, v0: 1, a: 1, m: 2, dt: 1, t: 0, playing: false, speed: 1, mode: 'explore', stopNote: false,
+  x0: -9, v0: 1, a: 1, m: 2, F: 2, dt: 1, t: 0, playing: false, speed: 1, mode: 'explore', stopNote: false,
+  lead: 'a', // which of a / F the user set last; it stays fixed when the mass changes
   show: { v: true, a: true, F: true, numbers: true, dotArrows: false, ghosts: false, gaps: false, graphs: true },
   pauseAtStop: true,
 };
 let SC = null;
 const maxIntervals = () => Math.min(24, Math.round(12 / S.dt));
 function rebuild() { SC = scenario({ x0: S.x0, v0: S.v0, a: S.a, m: S.m, dt: S.dt }, maxIntervals()); }
+// Newton's 2nd law ties a, F and m together: recompute whichever of a / F the user didn't set.
+function applyNewton() {
+  if (S.lead === 'F') S.a = S.F / S.m || 0;
+  else S.F = S.m * S.a || 0;
+}
 
 const PRESETS = [
   { name: 'Speeding up →', v: '+', a: '+', p: { x0: -9, v0: 1, a: 1 } },
@@ -300,7 +306,7 @@ const presetBox = $('presets');
 PRESETS.forEach((pr, i) => {
   const b = document.createElement('button');
   b.innerHTML = `<b>${pr.name}</b><small><span class="sg v">v ${pr.v}</span> · <span class="sg a">a ${pr.a}</span> · <span class="sg f">F ${pr.a}</span></small>`;
-  b.onclick = () => { Object.assign(S, pr.p); S.dt = 1; resetRun(); S.playing = true; syncUI(); markPreset(i); };
+  b.onclick = () => { Object.assign(S, pr.p); S.dt = 1; S.lead = 'a'; applyNewton(); resetRun(); S.playing = true; syncUI(); markPreset(i); };
   presetBox.append(b);
 });
 function markPreset(i) { [...presetBox.children].forEach((b, j) => b.classList.toggle('on', j === i)); }
@@ -310,14 +316,22 @@ function syncUI() {
   $('x0').value = S.x0; $('x0Out').textContent = `${signed(S.x0)} m`;
   $('v0').value = S.v0; $('v0Out').textContent = `${signed(S.v0)} m/s`;
   $('a').value = S.a; $('aOut').textContent = `${signed(S.a, 2)} m/s²`;
+  $('F').value = S.F; $('FOut').textContent = `${signed(S.F)} N`;
   $('m').value = S.m; $('mOut').textContent = `${S.m.toFixed(1)} kg`;
+  $('holdHint').textContent = S.lead === 'F'
+    ? 'Changing the mass keeps F net the same, so a = F net ÷ m changes.'
+    : 'Changing the mass keeps a the same, so F net = m · a changes.';
   $('dt').value = String(S.dt);
   $('playBtn').textContent = S.playing ? 'Pause' : S.t >= SC.T - 1e-9 ? 'Replay' : 'Play';
   $('graphs').hidden = !S.show.graphs;
 }
 
-for (const [id, key] of [['x0', 'x0'], ['v0', 'v0'], ['a', 'a'], ['m', 'm']]) {
-  $(id).addEventListener('input', (e) => { S[key] = +e.target.value; markPreset(-1); resetRun(); syncUI(); });
+for (const key of ['x0', 'v0', 'a', 'F', 'm']) {
+  $(key).addEventListener('input', (e) => {
+    S[key] = +e.target.value;
+    if (key === 'a' || key === 'F') S.lead = key;
+    applyNewton(); markPreset(-1); resetRun(); syncUI();
+  });
 }
 $('dt').onchange = (e) => { S.dt = +e.target.value; resetRun(); syncUI(); };
 $('speed').onchange = (e) => { S.speed = +e.target.value; };
@@ -507,7 +521,12 @@ const params = new URLSearchParams(location.search);
 if (params.get('theme')) theme = params.get('theme');
 setTheme(theme);
 rebuild(); syncUI(); markPreset(0);
-if (params.get('preset')) { const i = +params.get('preset'); Object.assign(S, PRESETS[i].p); resetRun(); markPreset(i); }
+if (params.get('preset')) { const i = +params.get('preset'); Object.assign(S, PRESETS[i].p); applyNewton(); resetRun(); markPreset(i); }
+// direct links like ?v0=4&F=-6&m=2 (F wins over a if both are given)
+for (const k of ['x0', 'v0', 'm', 'a', 'F']) {
+  if (params.has(k) && isFinite(+params.get(k))) { S[k] = +params.get(k); if (k === 'a' || k === 'F') S.lead = k; markPreset(-1); }
+}
+applyNewton(); resetRun(); syncUI();
 if (params.get('t')) S.t = Math.min(+params.get('t'), SC.T);
 for (const k of ['ghosts', 'gaps', 'dotArrows']) if (params.get(k)) { S.show[k] = true; $(Object.keys(toggles).find((id) => toggles[id] === k)).checked = true; }
 if (params.get('mode') === 'quiz') setMode('quiz');
